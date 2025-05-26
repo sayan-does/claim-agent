@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+httpx
+pytest
+pytest-asyncio
+PyPDF2
+pytesseract
+pillow
+pdf2image
+langchain
+langchain-community
+numpy<2
