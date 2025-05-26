@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  claim-agent:
+    build: .
+    container_name: claim-agent
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./documents:/app/documents
+      - ./claim_jsons:/app/claim_jsons
+    environment:
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - OPENROUTER_API_URL=${OPENROUTER_API_URL}
+      - OPENROUTER_MODEL=${OPENROUTER_MODEL}
+    restart: unless-stopped

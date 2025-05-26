@@ -32,6 +32,12 @@ SYSTEM_PROMPT = (
     "- Be concise, accurate, and avoid speculation.\n"
     "- Do not provide explanations unless explicitly asked.\n"
     "- Always use the most up-to-date medical and insurance terminology.\n"
+    "- When extracting or structuring data, always use the following JSON format as a reference for your output, including only the fields relevant to the document type:\n"
+    "  For a bill: {\\\"type\\\": \\\"bill\\\", \\\"hospital_name\\\": ..., \\\"total_amount\\\": ..., \\\"date_of_service\\\": ...}\n"
+    "  For a discharge summary: {\\\"type\\\": \\\"discharge_summary\\\", \\\"patient_name\\\": ..., \\\"diagnosis\\\": ..., \\\"admission_date\\\": ..., \\\"discharge_date\\\": ...}\n"
+    "  For an id_card: {\\\"type\\\": \\\"id_card\\\", \\\"patient_name\\\": ..., \\\"patient_id\\\": ..., \\\"insurance_provider\\\": ..., \\\"policy_number\\\": ..., \\\"validity_date\\\": ...}\n"
+    "  For other: {\\\"type\\\": \\\"other\\\", \\\"content_summary\\\": ...}\n"
+    "- Do not include extra fields or explanations in your JSON output.\n"
 )
 
 
@@ -84,28 +90,28 @@ async def extract_data_agent(text: str, doc_type: str):
     # Build a prompt for extraction based on doc_type
     if doc_type == "bill":
         user_prompt = (
-            "Extract the following fields from the medical bill document below as JSON: "
-            "hospital_name, patient_name, patient_id (if present), bill_number, bill_date, total_amount, services (as a list of strings). "
-            "If a field is missing, use null or an empty list. Respond with only the JSON object.\n\nDocument:\n" +
+            "Extract ONLY the following fields from the medical bill document below as a JSON object. Use this format (replace values with those from the document): "
+            '{"type": "bill", "hospital_name": "HOSPITAL_NAME", "total_amount": 12345, "date_of_service": "2024-04-10"}'
+            " If a field is missing, use null. Do not include extra fields or explanations.\n\nDocument:\n" +
             text[:2000]
         )
     elif doc_type == "discharge_summary":
         user_prompt = (
-            "Extract the following fields from the discharge summary below as JSON: "
-            "hospital_name, patient_name, patient_id (if present), admission_date, discharge_date, diagnosis, treatment_summary, doctor_name. "
-            "If a field is missing, use null. Respond with only the JSON object.\n\nDocument:\n" +
+            "Extract ONLY the following fields from the discharge summary below as a JSON object. Use this format (replace values with those from the document): "
+            '{"type": "discharge_summary", "patient_name": "PATIENT_NAME", "diagnosis": "DIAGNOSIS", "admission_date": "2024-04-01", "discharge_date": "2024-04-10"}'
+            " If a field is missing, use null. Do not include extra fields or explanations.\n\nDocument:\n" +
             text[:2000]
         )
     elif doc_type == "id_card":
         user_prompt = (
-            "Extract the following fields from the insurance ID card below as JSON: "
-            "patient_name, patient_id, insurance_provider, policy_number, validity_date (if present). "
-            "If a field is missing, use null. Respond with only the JSON object.\n\nDocument:\n" +
+            "Extract ONLY the following fields from the insurance ID card below as a JSON object. Use this format (replace values with those from the document): "
+            '{"type": "id_card", "patient_name": "PATIENT_NAME", "patient_id": "ID", "insurance_provider": "PROVIDER", "policy_number": "POLICY", "validity_date": "2024-12-31"}'
+            " If a field is missing, use null. Do not include extra fields or explanations.\n\nDocument:\n" +
             text[:2000]
         )
     else:
         user_prompt = (
-            "Summarize the content of the following document in at least 100 words.\n\nDocument:\n" +
+            "Summarize the content of the following document in at least 100 words. Respond with a JSON object: {\"type\": \"other\", \"content_summary\": \"SUMMARY\"}. Do not include extra fields or explanations.\n\nDocument:\n" +
             text[:2000]
         )
     headers = {

@@ -1,7 +1,5 @@
 # Medical Claim Processing Pipeline
 
-
-
 - Multi-agent orchestration for document classification, extraction, validation, and decision-making
 
 - Modular, testable, and async FastAPI backend
